@@ -31,7 +31,7 @@ const initMap = () => {
     const center = props.modelValue || { lat: 27.331252613158244, lng: 89.44666245759026 }
     const mapOptions: google.maps.MapOptions = {
         center,
-        zoom: 19,
+        zoom: 16,
         mapTypeId: 'satellite',
         streetViewControl: false,
         mapTypeControl: true,

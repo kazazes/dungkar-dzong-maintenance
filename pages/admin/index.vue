@@ -8,7 +8,11 @@
                 </button>
             </div>
 
-            <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+            <!-- Open Requests -->
+            <div class="bg-white shadow-lg rounded-lg overflow-hidden mb-8">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Open Requests</h2>
+                </div>
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
@@ -30,9 +34,6 @@
                                     Priority</th>
                                 <th
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Status</th>
-                                <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Created</th>
                                 <th
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -40,7 +41,7 @@
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
-                            <tr v-for="request in requests" :key="request.id" class="hover:bg-gray-50">
+                            <tr v-for="request in openRequests" :key="request.id" class="hover:bg-gray-50">
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">#{{ request.id }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <span :class="categoryClasses(request.category)">
@@ -58,16 +59,11 @@
                                         {{ request.priority }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span :class="statusClasses(request.status)">
-                                        {{ request.status }}
-                                    </span>
-                                </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                     {{ formatDate(request.createdAt) }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                    <button v-if="request.status === 'PENDING'" @click="openResolveModal(request)"
+                                    <button @click="openResolveModal(request)"
                                         class="text-indigo-600 hover:text-indigo-900">
                                         Resolve
                                     </button>
@@ -79,6 +75,88 @@
                             </tr>
                         </tbody>
                     </table>
+                </div>
+                <div v-if="hasMoreOpenRequests" class="px-6 py-4 border-t border-gray-200">
+                    <button @click="loadMoreOpenRequests" class="text-sm text-indigo-600 hover:text-indigo-900">
+                        Load More
+                    </button>
+                </div>
+            </div>
+
+            <!-- Resolved Requests -->
+            <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Resolved Requests</h2>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    ID</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Category</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Location</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Contact</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Priority</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Resolved</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Time to Resolution</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr v-for="request in resolvedRequests" :key="request.id" class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">#{{ request.id }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span :class="categoryClasses(request.category)">
+                                        {{ formatCategory(request.category) }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ request.location }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">{{ request.contactName }}</div>
+                                    <div class="text-sm text-gray-500">{{ request.contactNumber }}</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span :class="priorityClasses(request.priority)">
+                                        {{ request.priority }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ formatDate(request.resolvedAt || '') }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ calculateResolutionTime(request.createdAt, request.resolvedAt || '') }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                    <button @click="openDetailsModal(request)"
+                                        class="text-gray-600 hover:text-gray-900">
+                                        Details
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div v-if="hasMoreResolvedRequests" class="px-6 py-4 border-t border-gray-200">
+                    <button @click="loadMoreResolvedRequests" class="text-sm text-indigo-600 hover:text-indigo-900">
+                        Load More
+                    </button>
                 </div>
             </div>
         </div>
@@ -148,87 +226,108 @@
         <!-- Details Modal -->
         <div v-if="showDetailsModal"
             class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4">
-            <div class="bg-white rounded-lg max-w-2xl w-full p-6">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">Request Details</h3>
-                <div class="space-y-4">
-                    <div v-if="selectedRequest">
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <h4 class="text-sm font-medium text-gray-500">Category</h4>
-                                <p class="mt-1">
-                                    <span :class="categoryClasses(selectedRequest.category)">
-                                        {{ formatCategory(selectedRequest.category) }}
-                                    </span>
-                                </p>
-                            </div>
-                            <div>
-                                <h4 class="text-sm font-medium text-gray-500">Priority</h4>
-                                <p class="mt-1">
-                                    <span :class="priorityClasses(selectedRequest.priority)">
-                                        {{ selectedRequest.priority }}
-                                    </span>
-                                </p>
-                            </div>
-                            <div>
-                                <h4 class="text-sm font-medium text-gray-500">Contact Name</h4>
-                                <p class="mt-1">{{ selectedRequest.contactName }}</p>
-                            </div>
-                            <div>
-                                <h4 class="text-sm font-medium text-gray-500">Contact Number</h4>
-                                <p class="mt-1">{{ selectedRequest.contactNumber }}</p>
-                            </div>
-                        </div>
-                        <div class="mt-4">
-                            <h4 class="text-sm font-medium text-gray-500">Location</h4>
-                            <p class="mt-1">{{ selectedRequest.location }}</p>
-                            <div class="mt-2 h-64 rounded-lg overflow-hidden">
-                                <LocationMap
-                                    :modelValue="{ lat: selectedRequest.latitude, lng: selectedRequest.longitude }"
-                                    :readonly="true" />
-                            </div>
-                        </div>
-                        <div class="mt-4">
-                            <h4 class="text-sm font-medium text-gray-500">Details</h4>
-                            <p class="mt-1">{{ selectedRequest.details }}</p>
-                        </div>
-                        <div v-if="selectedRequest.imagePath" class="mt-4">
-                            <h4 class="text-sm font-medium text-gray-500">Request Image</h4>
-                            <img :src="selectedRequest.imagePath" alt="Maintenance request image"
-                                class="mt-1 max-h-48 rounded-lg" />
-                        </div>
-                        <div v-if="selectedRequest.status === 'RESOLVED'" class="mt-4 pt-4 border-t">
-                            <h4 class="text-sm font-medium text-gray-500">Resolution Details</h4>
-                            <div class="mt-2 grid grid-cols-2 gap-4">
+            <div class="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] flex flex-col">
+                <div class="p-6 border-b border-gray-200">
+                    <h3 class="text-lg font-medium text-gray-900">Request Details</h3>
+                </div>
+                <div class="p-6 overflow-y-auto flex-1">
+                    <div class="space-y-6">
+                        <div v-if="selectedRequest">
+                            <div class="grid grid-cols-2 gap-4">
                                 <div>
-                                    <p class="text-sm text-gray-500">Resolved By</p>
-                                    <p class="mt-1">{{ selectedRequest.resolvedBy }}</p>
+                                    <h4 class="text-sm font-medium text-gray-500">Category</h4>
+                                    <p class="mt-1">
+                                        <span :class="categoryClasses(selectedRequest.category)">
+                                            {{ formatCategory(selectedRequest.category) }}
+                                        </span>
+                                    </p>
                                 </div>
                                 <div>
-                                    <p class="text-sm text-gray-500">Resolved At</p>
-                                    <p class="mt-1">{{ formatDate(selectedRequest.resolvedAt || '') }}</p>
+                                    <h4 class="text-sm font-medium text-gray-500">Priority</h4>
+                                    <p class="mt-1">
+                                        <span :class="priorityClasses(selectedRequest.priority)">
+                                            {{ selectedRequest.priority }}
+                                        </span>
+                                    </p>
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-medium text-gray-500">Contact Name</h4>
+                                    <p class="mt-1">{{ selectedRequest.contactName }}</p>
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-medium text-gray-500">Contact Number</h4>
+                                    <p class="mt-1">{{ selectedRequest.contactNumber }}</p>
                                 </div>
                             </div>
-                            <div class="mt-2">
-                                <p class="text-sm text-gray-500">Resolution Notes</p>
-                                <p class="mt-1">{{ selectedRequest.resolutionNotes }}</p>
+                            <div class="mt-6">
+                                <h4 class="text-sm font-medium text-gray-500">Location</h4>
+                                <p class="mt-1">{{ selectedRequest.location }}</p>
+                                <div class="mt-2 h-64 rounded-lg overflow-hidden">
+                                    <LocationMap
+                                        :modelValue="{ lat: selectedRequest.latitude, lng: selectedRequest.longitude }"
+                                        :readonly="true" />
+                                </div>
                             </div>
-                            <div v-if="selectedRequest.resolutionImages?.length" class="mt-4">
-                                <h4 class="text-sm font-medium text-gray-500">Resolution Images</h4>
-                                <div class="mt-2 grid grid-cols-2 gap-4">
-                                    <div v-for="(image, index) in selectedRequest.resolutionImages" :key="index">
-                                        <img :src="image" :alt="`Resolution image ${index + 1}`"
-                                            class="w-full h-48 object-cover rounded-lg" />
+                            <div class="mt-6">
+                                <h4 class="text-sm font-medium text-gray-500">Details</h4>
+                                <p class="mt-1">{{ selectedRequest.details }}</p>
+                            </div>
+                            <div v-if="selectedRequest.imagePath" class="mt-6">
+                                <h4 class="text-sm font-medium text-gray-500">Request Image</h4>
+                                <img :src="selectedRequest.imagePath" alt="Maintenance request image"
+                                    class="mt-2 max-h-64 rounded-lg" />
+                            </div>
+                            <div v-if="selectedRequest.status === 'RESOLVED'" class="mt-6 pt-6 border-t">
+                                <h4 class="text-sm font-medium text-gray-500">Resolution Details</h4>
+                                <div class="mt-4 grid grid-cols-2 gap-4">
+                                    <div>
+                                        <p class="text-sm text-gray-500">Resolved By</p>
+                                        <p class="mt-1">{{ selectedRequest.resolvedBy }}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-500">Resolved At</p>
+                                        <p class="mt-1">{{ formatDate(selectedRequest.resolvedAt || '') }}</p>
+                                    </div>
+                                    <div class="col-span-2">
+                                        <p class="text-sm text-gray-500">Time to Resolution</p>
+                                        <p class="mt-1">{{ calculateResolutionTime(selectedRequest.createdAt,
+                                            selectedRequest.resolvedAt || '') }}</p>
+                                    </div>
+                                </div>
+                                <div class="mt-4">
+                                    <p class="text-sm text-gray-500">Resolution Notes</p>
+                                    <p class="mt-1">{{ selectedRequest.resolutionNotes }}</p>
+                                </div>
+                                <div v-if="selectedRequest.resolutionImages?.length" class="mt-6">
+                                    <h4 class="text-sm font-medium text-gray-500">Resolution Images</h4>
+                                    <div class="mt-2 grid grid-cols-2 gap-4">
+                                        <div v-for="(image, index) in selectedRequest.resolutionImages" :key="index"
+                                            class="relative">
+                                            <img :src="image" :alt="`Resolution image ${index + 1}`"
+                                                class="w-full aspect-video object-cover rounded-lg" />
+                                            <button type="button" @click="openImageInNewTab(image)"
+                                                class="absolute bottom-2 right-2 p-1.5 bg-black bg-opacity-50 rounded-full text-white hover:bg-opacity-75">
+                                                <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                    viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                                </svg>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="mt-5 flex justify-end">
-                    <button type="button" @click="showDetailsModal = false"
-                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
-                        Close
-                    </button>
+                <div class="p-6 border-t border-gray-200">
+                    <div class="flex justify-end">
+                        <button type="button" @click="showDetailsModal = false"
+                            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                            Close
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -269,7 +368,8 @@ interface ResolutionImage {
 }
 
 const router = useRouter()
-const requests = ref<MaintenanceRequest[]>([])
+const openRequests = ref<MaintenanceRequest[]>([])
+const resolvedRequests = ref<MaintenanceRequest[]>([])
 const showResolveModal = ref(false)
 const showDetailsModal = ref(false)
 const selectedRequest = ref<MaintenanceRequest | null>(null)
@@ -280,14 +380,58 @@ const resolveForm = ref({
 const resolutionImageInput = ref<HTMLInputElement | null>(null)
 const resolutionImages = ref<ResolutionImage[]>([])
 
-// Fetch requests
-const fetchRequests = async () => {
+// Pagination
+const openRequestsPage = ref(1)
+const resolvedRequestsPage = ref(1)
+const pageSize = 10
+const hasMoreOpenRequests = ref(true)
+const hasMoreResolvedRequests = ref(true)
+
+// Fetch requests with pagination
+const fetchRequests = async (status: 'PENDING' | 'RESOLVED', page: number) => {
     try {
-        const response = await $fetch<MaintenanceRequest[]>('/api/maintenance-requests')
-        requests.value = response
+        const response = await $fetch<MaintenanceRequest[]>('/api/maintenance-requests', {
+            query: {
+                status,
+                page,
+                pageSize
+            }
+        })
+
+        if (response.length < pageSize) {
+            if (status === 'PENDING') {
+                hasMoreOpenRequests.value = false
+            } else {
+                hasMoreResolvedRequests.value = false
+            }
+        }
+
+        if (status === 'PENDING') {
+            if (page === 1) {
+                openRequests.value = response
+            } else {
+                openRequests.value = [...openRequests.value, ...response]
+            }
+        } else {
+            if (page === 1) {
+                resolvedRequests.value = response
+            } else {
+                resolvedRequests.value = [...resolvedRequests.value, ...response]
+            }
+        }
     } catch (error) {
         console.error('Error fetching requests:', error)
     }
+}
+
+const loadMoreOpenRequests = async () => {
+    openRequestsPage.value++
+    await fetchRequests('PENDING', openRequestsPage.value)
+}
+
+const loadMoreResolvedRequests = async () => {
+    resolvedRequestsPage.value++
+    await fetchRequests('RESOLVED', resolvedRequestsPage.value)
 }
 
 // Format date
@@ -334,14 +478,6 @@ const priorityClasses = (priority: string) => {
         default:
             return classes
     }
-}
-
-// Status classes
-const statusClasses = (status: string) => {
-    const classes = 'px-2 py-1 text-xs font-medium rounded-full'
-    return status === 'PENDING'
-        ? `${classes} bg-yellow-100 text-yellow-800`
-        : `${classes} bg-green-100 text-green-800`
 }
 
 // Open resolve modal
@@ -398,7 +534,16 @@ const resolveRequest = async () => {
         showResolveModal.value = false
         resolveForm.value = { resolvedBy: '', resolutionNotes: '' }
         resolutionImages.value = []
-        await fetchRequests()
+
+        // Refresh both tables
+        openRequestsPage.value = 1
+        resolvedRequestsPage.value = 1
+        hasMoreOpenRequests.value = true
+        hasMoreResolvedRequests.value = true
+        await Promise.all([
+            fetchRequests('PENDING', 1),
+            fetchRequests('RESOLVED', 1)
+        ])
     } catch (error) {
         console.error('Error resolving request:', error)
     }
@@ -412,7 +557,36 @@ const logout = () => {
 }
 
 // Fetch requests on mount
-onMounted(() => {
-    fetchRequests()
+onMounted(async () => {
+    await Promise.all([
+        fetchRequests('PENDING', 1),
+        fetchRequests('RESOLVED', 1)
+    ])
 })
+
+// Calculate resolution time
+const calculateResolutionTime = (createdAt: string, resolvedAt: string) => {
+    if (!resolvedAt) return '-'
+
+    const created = new Date(createdAt)
+    const resolved = new Date(resolvedAt)
+    const diffInMillis = resolved.getTime() - created.getTime()
+
+    // Convert to minutes, hours, and days
+    const minutes = Math.floor(diffInMillis / (1000 * 60))
+    const hours = Math.floor(minutes / 60)
+    const days = Math.floor(hours / 24)
+
+    if (days > 0) {
+        return days === 1 ? '1 day' : `${days} days`
+    }
+    if (hours > 0) {
+        return hours === 1 ? '1 hour' : `${hours} hours`
+    }
+    return minutes === 1 ? '1 minute' : `${minutes} minutes`
+}
+
+const openImageInNewTab = (imageUrl: string) => {
+    window.open(imageUrl, '_blank')
+}
 </script>

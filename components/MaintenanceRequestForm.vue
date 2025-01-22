@@ -21,7 +21,7 @@
             </div>
 
             <!-- Category and Priority Section -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="form-group">
                     <label for="category" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
                     <select id="category" v-model="formData.category" required
@@ -44,6 +44,17 @@
                         <option value="HIGH">High Priority</option>
                         <option value="URGENT">Urgent</option>
                     </select>
+                </div>
+            </div>
+
+            <!-- Details Section -->
+            <div class="space-y-6">
+                <div class="form-group">
+                    <label for="details" class="block text-sm font-medium text-gray-700 mb-1">Maintenance
+                        Details</label>
+                    <textarea id="details" v-model="formData.details" required rows="4"
+                        placeholder="Please describe what needs to be repaired..."
+                        class="block w-full px-4 py-3 rounded-lg border border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"></textarea>
                 </div>
 
                 <div class="form-group">
@@ -69,15 +80,6 @@
                         </button>
                     </div>
                 </div>
-            </div>
-
-            <!-- Details Section -->
-            <div class="form-group">
-                <label for="details" class="block text-sm font-medium text-gray-700 mb-1">Maintenance
-                    Details</label>
-                <textarea id="details" v-model="formData.details" required rows="4"
-                    placeholder="Please describe what needs to be repaired..."
-                    class="block w-full px-4 py-3 rounded-lg border border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"></textarea>
             </div>
 
             <!-- Location Section -->
@@ -134,7 +136,8 @@ const formData = ref<MaintenanceRequestFormData>({
     category: '',
     priority: '',
     details: '',
-    imagePath: null
+    imagePath: null,
+    resolutionImages: []
 })
 
 const selectedCoordinates = ref<{ lat: number; lng: number } | null>(null)
@@ -187,7 +190,7 @@ const submitForm = async () => {
         formData.value.longitude = selectedCoordinates.value.lng
 
         Object.entries(formData.value).forEach(([key, value]) => {
-            if (value !== null) {
+            if (value !== null && key !== 'resolutionImages') {
                 formDataToSend.append(key, value.toString())
             }
         })
@@ -210,7 +213,8 @@ const submitForm = async () => {
             category: '',
             priority: '',
             details: '',
-            imagePath: null
+            imagePath: null,
+            resolutionImages: []
         }
         selectedCoordinates.value = null
         removeImage()
