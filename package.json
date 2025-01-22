@@ -18,6 +18,7 @@
   "devDependencies": {
     "@nuxtjs/tailwindcss": "^6.11.4",
     "@tailwindcss/forms": "^0.5.7",
+    "@types/google.maps": "^3.58.1",
     "@types/node": "^22.10.2",
     "autoprefixer": "^10.4.17",
     "h3": "^1.13.0",

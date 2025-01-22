@@ -15,6 +15,7 @@ model MaintenanceRequest {
   longitude     Float
   contactName   String
   contactNumber String
+  category      String    // Can be 'ELECTRICAL', 'PLUMBING', 'INTERNET_CABLE', 'OTHER'
   priority      String    // Can be 'LOW', 'MEDIUM', 'HIGH', 'URGENT'
   details       String    @db.Text
   imagePath     String?   // Optional field for image path
@@ -22,6 +23,7 @@ model MaintenanceRequest {
   resolvedBy    String?
   resolvedAt    DateTime?
   resolutionNotes String? @db.Text
+  resolutionImages String[] // Array of resolution image paths
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 } 

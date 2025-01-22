@@ -1,28 +1,59 @@
-import { PrismaClient } from '@prisma/client'
+import { Prisma, PrismaClient } from '@prisma/client'
 import { mkdir, writeFile } from 'fs/promises'
 import { join } from 'path'
 
 const prisma = new PrismaClient()
+
+type MaintenanceRequestInput = Prisma.MaintenanceRequestCreateInput
 
 export default defineEventHandler(async (event) => {
     try {
         const formData = await readMultipartFormData(event)
         if (!formData) throw new Error('No form data received')
 
-        const data: Record<string, any> = {}
+        const requestData: Partial<MaintenanceRequestInput> = {}
         let imageFile = null
 
         // Process form data
         for (const field of formData) {
             if (field.name === 'image') {
                 imageFile = field
+                continue
+            }
+
+            const fieldName = field.name as keyof MaintenanceRequestInput
+            if (fieldName === 'latitude' || fieldName === 'longitude') {
+                // Parse coordinates as floats
+                const value = parseFloat(field.data.toString())
+                if (isNaN(value)) {
+                    throw new Error(`Invalid ${fieldName} value`)
+                }
+                requestData[fieldName] = value
             } else {
-                data[field.name] = field.data.toString()
+                // Handle other fields as strings
+                requestData[fieldName] = field.data.toString()
+            }
+        }
+
+        // Validate required fields
+        const requiredFields: (keyof MaintenanceRequestInput)[] = [
+            'location',
+            'latitude',
+            'longitude',
+            'contactName',
+            'contactNumber',
+            'category',
+            'priority',
+            'details'
+        ]
+
+        for (const field of requiredFields) {
+            if (requestData[field] === undefined) {
+                throw new Error(`Missing required field: ${field}`)
             }
         }
 
         // Handle image upload if present
-        let imagePath = null
         if (imageFile) {
             // Create uploads directory if it doesn't exist
             const uploadsDir = join(process.cwd(), 'public', 'uploads')
@@ -34,19 +65,12 @@ export default defineEventHandler(async (event) => {
 
             // Save file
             await writeFile(filePath, imageFile.data)
-            imagePath = `/uploads/${filename}`
+            requestData.imagePath = `/uploads/${filename}`
         }
 
         // Create maintenance request
         const maintenanceRequest = await prisma.maintenanceRequest.create({
-            data: {
-                location: data.location,
-                contactName: data.contactName,
-                contactNumber: data.contactNumber,
-                priority: data.priority,
-                details: data.details,
-                imagePath: imagePath
-            },
+            data: requestData as MaintenanceRequestInput
         })
 
         return maintenanceRequest
@@ -54,7 +78,7 @@ export default defineEventHandler(async (event) => {
         console.error('Error creating maintenance request:', error)
         throw createError({
             statusCode: 500,
-            statusMessage: 'Error creating maintenance request'
+            statusMessage: error instanceof Error ? error.message : 'Error creating maintenance request'
         })
     }
 }) 

@@ -20,8 +20,20 @@
                 </div>
             </div>
 
-            <!-- Priority and Photo Section -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Category and Priority Section -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="form-group">
+                    <label for="category" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                    <select id="category" v-model="formData.category" required
+                        class="block w-full px-4 py-3 rounded-lg border border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white">
+                        <option value="">Select category</option>
+                        <option value="ELECTRICAL">Electrical</option>
+                        <option value="PLUMBING">Plumbing</option>
+                        <option value="INTERNET_CABLE">Internet & Cable</option>
+                        <option value="OTHER">Other</option>
+                    </select>
+                </div>
+
                 <div class="form-group">
                     <label for="priority" class="block text-sm font-medium text-gray-700 mb-1">Priority Level</label>
                     <select id="priority" v-model="formData.priority" required
@@ -80,12 +92,14 @@
 
                 <div class="form-group">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Select Location on Map</label>
-                    <LocationMap v-model="selectedCoordinates" />
+                    <div class="h-[500px]">
+                        <LocationMap v-model="selectedCoordinates" />
+                    </div>
                 </div>
             </div>
 
             <div class="pt-6">
-                <button type="submit" :disabled="isSubmitting || !selectedCoordinates"
+                <button type="submit" :disabled="isSubmitting || formData.latitude === 0 || formData.longitude === 0"
                     class="w-full bg-indigo-600 text-white px-4 py-3 rounded-lg font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200 disabled:opacity-75 disabled:cursor-not-allowed flex items-center justify-center space-x-2">
                     <svg v-if="isSubmitting" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
                         xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -97,7 +111,7 @@
                     </svg>
                     <span>{{ isSubmitting ? 'Submitting...' : 'Submit Request' }}</span>
                 </button>
-                <p v-if="!selectedCoordinates" class="mt-2 text-sm text-red-600">
+                <p v-if="formData.latitude === 0 || formData.longitude === 0" class="mt-2 text-sm text-red-600">
                     Please select a location on the map
                 </p>
             </div>
@@ -105,30 +119,49 @@
     </div>
 </template>
 
-<script setup>
-import { ref } from 'vue';
+<script setup lang="ts">
+import type { MaintenanceRequest } from '@prisma/client'
+import { ref, watch } from 'vue'
 
-const formData = ref({
+type MaintenanceRequestFormData = Omit<MaintenanceRequest, 'id' | 'status' | 'resolvedBy' | 'resolvedAt' | 'resolutionNotes' | 'createdAt' | 'updatedAt'>
+
+const formData = ref<MaintenanceRequestFormData>({
     location: '',
+    latitude: 0,
+    longitude: 0,
     contactName: '',
     contactNumber: '',
+    category: '',
     priority: '',
-    details: ''
+    details: '',
+    imagePath: null
 })
 
-const selectedCoordinates = ref(null)
+const selectedCoordinates = ref<{ lat: number; lng: number } | null>(null)
 const isSubmitting = ref(false)
-const imageInput = ref(null)
-const selectedImage = ref(null)
-const imagePreview = ref(null)
+const imageInput = ref<HTMLInputElement | null>(null)
+const selectedImage = ref<File | null>(null)
+const imagePreview = ref<string | null>(null)
 
-const handleImageChange = (event) => {
-    const file = event.target.files[0]
+// Watch for coordinate changes
+watch(selectedCoordinates, (newCoords) => {
+    if (newCoords) {
+        formData.value.latitude = newCoords.lat
+        formData.value.longitude = newCoords.lng
+    } else {
+        formData.value.latitude = 0
+        formData.value.longitude = 0
+    }
+}, { immediate: true })
+
+const handleImageChange = (event: Event) => {
+    const target = event.target as HTMLInputElement
+    const file = target.files?.[0]
     if (file) {
         selectedImage.value = file
         const reader = new FileReader()
         reader.onload = (e) => {
-            imagePreview.value = e.target.result
+            imagePreview.value = e.target?.result as string
         }
         reader.readAsDataURL(file)
     }
@@ -148,29 +181,36 @@ const submitForm = async () => {
     isSubmitting.value = true
     try {
         const formDataToSend = new FormData()
-        Object.entries(formData.value).forEach(([key, value]) => {
-            formDataToSend.append(key, value)
-        })
 
-        // Add coordinates
-        formDataToSend.append('latitude', selectedCoordinates.value.lat.toString())
-        formDataToSend.append('longitude', selectedCoordinates.value.lng.toString())
+        // Update coordinates before submission
+        formData.value.latitude = selectedCoordinates.value.lat
+        formData.value.longitude = selectedCoordinates.value.lng
+
+        Object.entries(formData.value).forEach(([key, value]) => {
+            if (value !== null) {
+                formDataToSend.append(key, value.toString())
+            }
+        })
 
         if (selectedImage.value) {
             formDataToSend.append('image', selectedImage.value)
         }
 
-        const response = await $fetch('/api/maintenance-requests', {
+        const response = await $fetch<MaintenanceRequest>('/api/maintenance-requests', {
             method: 'POST',
             body: formDataToSend
         })
 
         formData.value = {
             location: '',
+            latitude: 0,
+            longitude: 0,
             contactName: '',
             contactNumber: '',
+            category: '',
             priority: '',
-            details: ''
+            details: '',
+            imagePath: null
         }
         selectedCoordinates.value = null
         removeImage()
