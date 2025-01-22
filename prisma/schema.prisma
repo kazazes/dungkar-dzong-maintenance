@@ -11,6 +11,8 @@ datasource db {
 model MaintenanceRequest {
   id            Int       @id @default(autoincrement())
   location      String
+  latitude      Float
+  longitude     Float
   contactName   String
   contactNumber String
   priority      String    // Can be 'LOW', 'MEDIUM', 'HIGH', 'URGENT'
