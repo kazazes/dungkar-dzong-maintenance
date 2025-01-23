@@ -23,6 +23,8 @@ services:
       - "3000:3000"
     depends_on:
       - postgres
+    env_file:
+      - .env
     environment:
       DATABASE_URL: "postgresql://dungkar:dungkar_secret@postgres:5432/dungkar_dzong_db"
       GOOGLE_MAPS_API_KEY: ${GOOGLE_MAPS_API_KEY}
