@@ -5,7 +5,7 @@ services:
     container_name: dungkar_dzong_db
     restart: always
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     environment:
       POSTGRES_USER: dungkar
       POSTGRES_PASSWORD: dungkar_secret
