@@ -262,11 +262,13 @@
                             <div class="mt-6">
                                 <h4 class="text-sm font-medium text-gray-500">Location</h4>
                                 <p class="mt-1">{{ selectedRequest.location }}</p>
-                                <div class="mt-2 h-64 rounded-lg overflow-hidden">
+                                <div v-if="selectedRequest.latitude && selectedRequest.longitude"
+                                    class="mt-2 h-64 rounded-lg overflow-hidden">
                                     <LocationMap
                                         :modelValue="{ lat: selectedRequest.latitude, lng: selectedRequest.longitude }"
                                         :readonly="true" />
                                 </div>
+                                <p v-else class="mt-2 text-sm text-gray-500">No map location provided</p>
                             </div>
                             <div class="mt-6">
                                 <h4 class="text-sm font-medium text-gray-500">Details</h4>

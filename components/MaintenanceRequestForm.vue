@@ -93,7 +93,8 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Select Location on Map</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Select Location on Map
+                        (Optional)</label>
                     <div class="h-[500px]">
                         <LocationMap v-model="selectedCoordinates" />
                     </div>
@@ -101,7 +102,7 @@
             </div>
 
             <div class="pt-6">
-                <button type="submit" :disabled="isSubmitting || formData.latitude === 0 || formData.longitude === 0"
+                <button type="submit" :disabled="isSubmitting"
                     class="w-full bg-indigo-600 text-white px-4 py-3 rounded-lg font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200 disabled:opacity-75 disabled:cursor-not-allowed flex items-center justify-center space-x-2">
                     <svg v-if="isSubmitting" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
                         xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -113,9 +114,6 @@
                     </svg>
                     <span>{{ isSubmitting ? 'Submitting...' : 'Submit Request' }}</span>
                 </button>
-                <p v-if="formData.latitude === 0 || formData.longitude === 0" class="mt-2 text-sm text-red-600">
-                    Please select a location on the map
-                </p>
             </div>
         </form>
     </div>
@@ -129,8 +127,8 @@ type MaintenanceRequestFormData = Omit<MaintenanceRequest, 'id' | 'status' | 're
 
 const formData = ref<MaintenanceRequestFormData>({
     location: '',
-    latitude: 0,
-    longitude: 0,
+    latitude: null,
+    longitude: null,
     contactName: '',
     contactNumber: '',
     category: '',
@@ -152,8 +150,8 @@ watch(selectedCoordinates, (newCoords) => {
         formData.value.latitude = newCoords.lat
         formData.value.longitude = newCoords.lng
     } else {
-        formData.value.latitude = 0
-        formData.value.longitude = 0
+        formData.value.latitude = null
+        formData.value.longitude = null
     }
 }, { immediate: true })
 
@@ -179,15 +177,17 @@ const removeImage = () => {
 }
 
 const submitForm = async () => {
-    if (isSubmitting.value || !selectedCoordinates.value) return
+    if (isSubmitting.value) return
 
     isSubmitting.value = true
     try {
         const formDataToSend = new FormData()
 
-        // Update coordinates before submission
-        formData.value.latitude = selectedCoordinates.value.lat
-        formData.value.longitude = selectedCoordinates.value.lng
+        // Update coordinates if selected
+        if (selectedCoordinates.value) {
+            formData.value.latitude = selectedCoordinates.value.lat
+            formData.value.longitude = selectedCoordinates.value.lng
+        }
 
         Object.entries(formData.value).forEach(([key, value]) => {
             if (value !== null && key !== 'resolutionImages') {
@@ -206,8 +206,8 @@ const submitForm = async () => {
 
         formData.value = {
             location: '',
-            latitude: 0,
-            longitude: 0,
+            latitude: null,
+            longitude: null,
             contactName: '',
             contactNumber: '',
             category: '',

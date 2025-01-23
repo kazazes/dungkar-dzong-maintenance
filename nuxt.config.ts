@@ -8,7 +8,8 @@ export default defineNuxtConfig({
   ],
   runtimeConfig: {
     public: {
-      googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY
+      googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY,
+      adminPassword: process.env.ADMIN_PASSWORD
     }
   },
   app: {

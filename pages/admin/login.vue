@@ -28,13 +28,14 @@
 </template>
 
 <script setup>
+const config = useRuntimeConfig()
 const password = ref('')
 const error = ref('')
 const router = useRouter()
 const adminAuth = useCookie('admin_authenticated')
 
 const handleLogin = () => {
-    if (password.value === 'dzong') {
+    if (password.value === config.public.adminPassword) {
         adminAuth.value = 'true'
         router.push('/admin')
         error.value = ''

@@ -23,12 +23,11 @@ export default defineEventHandler(async (event) => {
 
             const fieldName = field.name as keyof MaintenanceRequestInput
             if (fieldName === 'latitude' || fieldName === 'longitude') {
-                // Parse coordinates as floats
+                // Parse coordinates as floats if provided
                 const value = parseFloat(field.data.toString())
-                if (isNaN(value)) {
-                    throw new Error(`Invalid ${fieldName} value`)
+                if (!isNaN(value)) {
+                    requestData[fieldName] = value
                 }
-                requestData[fieldName] = value
             } else {
                 // Handle other fields as strings
                 requestData[fieldName] = field.data.toString()
@@ -38,8 +37,6 @@ export default defineEventHandler(async (event) => {
         // Validate required fields
         const requiredFields: (keyof MaintenanceRequestInput)[] = [
             'location',
-            'latitude',
-            'longitude',
             'contactName',
             'contactNumber',
             'category',

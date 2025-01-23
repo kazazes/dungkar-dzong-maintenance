@@ -7,23 +7,27 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:debug": "playwright test --debug"
   },
   "dependencies": {
     "@heroicons/vue": "^2.1.1",
     "@nuxt/ui": "^2.14.1",
-    "@prisma/client": "^6.1.0",
+    "@prisma/client": "^6.2.1",
     "nuxt": "^3.14.1592"
   },
   "devDependencies": {
     "@nuxtjs/tailwindcss": "^6.11.4",
+    "@playwright/test": "^1.49.1",
     "@tailwindcss/forms": "^0.5.7",
     "@types/google.maps": "^3.58.1",
     "@types/node": "^22.10.2",
     "autoprefixer": "^10.4.17",
     "h3": "^1.13.0",
     "postcss": "^8.4.35",
-    "prisma": "^6.1.0",
+    "prisma": "^6.2.1",
     "tailwindcss": "^3.4.1"
   },
   "packageManager": "yarn@1.22.22+sha1.ac34549e6aa8e7ead463a7407e1c7390f61a6610"
