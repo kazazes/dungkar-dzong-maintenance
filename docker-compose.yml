@@ -24,7 +24,7 @@ services:
     depends_on:
       - postgres
     environment:
-      DATABASE_URL: ${DATABASE_URL}
+      DATABASE_URL: "postgresql://dungkar:dungkar_secret@postgres:5432/dungkar_dzong_db"
       GOOGLE_MAPS_API_KEY: ${GOOGLE_MAPS_API_KEY}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD}
 

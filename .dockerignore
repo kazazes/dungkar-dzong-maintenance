@@ -1,4 +1,6 @@
 public/uploads
+test-results
+playwright-report
 
 # Node modules
 node_modules
