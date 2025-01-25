@@ -1,5 +1,8 @@
 import { defineNuxtPlugin, useRuntimeConfig } from '#app'
 
+// Create a promise that will resolve when Google Maps is loaded
+let googleMapsReady: Promise<void>
+
 export default defineNuxtPlugin(async (nuxtApp) => {
     const config = useRuntimeConfig()
 
@@ -12,8 +15,8 @@ export default defineNuxtPlugin(async (nuxtApp) => {
 
     // Only load on client side
     if (process.client) {
-        // Create a promise to load the script
-        const loadGoogleMaps = new Promise<void>((resolve, reject) => {
+        // Initialize the loading promise
+        googleMapsReady = new Promise<void>((resolve, reject) => {
             const script = document.createElement('script')
             const apiKey = config.public.googleMapsApiKey
 
@@ -39,11 +42,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
             document.head.appendChild(script)
         })
 
-        try {
-            await loadGoogleMaps
-            console.log('Google Maps initialized successfully')
-        } catch (error) {
-            console.error('Error initializing Google Maps:', error)
-        }
+        // Provide the ready promise to components
+        nuxtApp.provide('googleMapsReady', googleMapsReady)
     }
 }) 

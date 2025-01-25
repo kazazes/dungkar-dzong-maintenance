@@ -37,8 +37,8 @@ services:
       - postgres
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
-      - GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}
-      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - NUXT_PUBLIC_GOOGLE_MAPS_API_KEY=${NUXT_PUBLIC_GOOGLE_MAPS_API_KEY}
+      - NUXT_ADMIN_PASSWORD=${NUXT_ADMIN_PASSWORD}
     volumes:
       - /var/www/dungkar-dzong/uploads:/app/public/uploads
     labels:
