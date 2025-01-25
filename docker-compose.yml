@@ -1,34 +1,62 @@
-version: '3.8'
+version: "3.8"
+
 services:
+  traefik:
+    image: traefik:v2.10
+    container_name: traefik
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik/acme.json:/acme.json
+      - ./traefik/config:/etc/traefik
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.file.directory=/etc/traefik"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL}"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/acme.json"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+
+  app:
+    build: .
+    container_name: dungkar_dzong_app
+    restart: always
+    depends_on:
+      - postgres
+    environment:
+      - DATABASE_URL=postgresql://dungkar:dungkar_secret@postgres:5432/dungkar_dzong_db
+      - GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.app.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.app.entrypoints=websecure"
+      - "traefik.http.routers.app.tls.certresolver=letsencrypt"
+      - "traefik.http.services.app.loadbalancer.server.port=3000"
+      # Redirect HTTP to HTTPS
+      - "traefik.http.routers.app-http.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.app-http.entrypoints=web"
+      - "traefik.http.routers.app-http.middlewares=redirect-to-https"
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+
   postgres:
     image: postgres:16-alpine
     container_name: dungkar_dzong_db
     restart: always
-    ports:
-      - "127.0.0.1:5432:5432"
     environment:
       POSTGRES_USER: dungkar
       POSTGRES_PASSWORD: dungkar_secret
       POSTGRES_DB: dungkar_dzong_db
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: dungkar_dzong_app
-    restart: always
-    ports:
-      - "3000:3000"
-    depends_on:
-      - postgres
-    env_file:
-      - .env
-    environment:
-      DATABASE_URL: "postgresql://dungkar:dungkar_secret@postgres:5432/dungkar_dzong_db"
-      GOOGLE_MAPS_API_KEY: ${GOOGLE_MAPS_API_KEY}
-      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      - postgres_data:
+    labels:
+      - "traefik.enable=false"
 
 volumes:
-  postgres_data: 
+  postgres_data:
