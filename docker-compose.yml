@@ -36,6 +36,8 @@ services:
       - DATABASE_URL=postgresql://dungkar:dungkar_secret@postgres:5432/dungkar_dzong_db
       - GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+    volumes:
+      - ./uploads:/app/public/uploads
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.app.rule=Host(`${DOMAIN}`)"
@@ -57,9 +59,10 @@ services:
       POSTGRES_PASSWORD: dungkar_secret
       POSTGRES_DB: dungkar_dzong_db
     volumes:
-      - postgres_data:
+      - postgres_data:/var/lib/postgresql/data
     labels:
       - "traefik.enable=false"
 
 volumes:
   postgres_data:
+    driver: local

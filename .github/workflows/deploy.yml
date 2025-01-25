@@ -29,10 +29,11 @@ jobs:
           ssh $VPS_USER@$VPS_HOST 'bash -s' << 'ENDSSH'
             cd ~/dungkar-dzong-maintenance
             
-            # Ensure Traefik directories exist
-            mkdir -p traefik/config
+            # Ensure required directories exist
+            mkdir -p traefik/config uploads
             touch traefik/acme.json
             chmod 600 traefik/acme.json
+            chmod 755 uploads
             
             # Pull latest changes
             git pull
