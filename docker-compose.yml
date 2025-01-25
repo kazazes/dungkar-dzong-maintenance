@@ -5,6 +5,9 @@ services:
     image: traefik:v2.10
     container_name: traefik
     restart: always
+    environment:
+      - ACME_EMAIL=peterkazazes@academy.bt
+      - DOMAIN=maintenance.dungkar.bt
     ports:
       - "80:80"
       - "443:443"
