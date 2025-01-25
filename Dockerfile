@@ -27,6 +27,8 @@ WORKDIR /app
 # Copy only the necessary files from the build stage
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/.output ./.output
+COPY --from=build /app/package.json ./package.json
+COPY --from=build /app/prisma ./prisma
 
 # Expose the port the app runs on
 EXPOSE 3000
