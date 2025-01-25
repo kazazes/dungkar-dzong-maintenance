@@ -29,17 +29,17 @@ jobs:
           ssh $VPS_USER@$VPS_HOST 'bash -s' << 'ENDSSH'
             cd ~/dungkar-dzong-maintenance
             
-            # Ensure required directories exist
-            mkdir -p traefik/config uploads
-            touch traefik/acme.json
-            chmod 600 traefik/acme.json
-            chmod 755 uploads
+            # Ensure required directories exist with correct permissions
+            sudo mkdir -p /etc/traefik/config /var/www/dungkar-dzong/uploads
+            sudo chown -R $USER:$USER /etc/traefik /var/www/dungkar-dzong
+            sudo chmod 600 /etc/traefik/acme.json
+            sudo chmod 755 /var/www/dungkar-dzong/uploads
+            
+            # Copy Traefik config
+            sudo cp traefik/config/tls.yml /etc/traefik/config/
             
             # Pull latest changes
             git pull
-            
-            # Copy Traefik config
-            cp traefik/config/tls.yml traefik/config/
             
             # Restart containers
             docker compose down

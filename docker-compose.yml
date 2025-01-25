@@ -13,8 +13,8 @@ services:
       - "443:443"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./traefik/acme.json:/acme.json
-      - ./traefik/config:/etc/traefik
+      - /etc/traefik/acme.json:/acme.json
+      - /etc/traefik/config:/etc/traefik
     command:
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
@@ -37,7 +37,7 @@ services:
       - GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD}
     volumes:
-      - ./uploads:/app/public/uploads
+      - /var/www/dungkar-dzong/uploads:/app/public/uploads
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.app.rule=Host(`${DOMAIN}`)"
