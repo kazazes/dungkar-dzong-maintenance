@@ -70,5 +70,15 @@ jobs:
             echo "Checking deployment status..."
             # Check deployment status
             docker compose ps
+            
+            echo "Checking Traefik routing configuration..."
+            docker compose logs traefik | grep -A 5 "Router\|Rule"
+            
+            echo "Checking app container logs..."
+            docker compose logs --tail 50 app
+            
+            echo "Verifying app is responding..."
+            curl -v -H "Host: ${DOMAIN}" http://localhost:3000/
+            
             echo "Deployment completed successfully!"
           ENDSSH
