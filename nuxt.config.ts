@@ -7,14 +7,16 @@ export default defineNuxtConfig({
     '@nuxt/ui'
   ],
   runtimeConfig: {
+    // Private keys that are only available server-side
+    adminPassword: '', // can be overridden by NUXT_ADMIN_PASSWORD environment variable
     public: {
-      googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY,
-      adminPassword: process.env.ADMIN_PASSWORD
+      // Keys within public are also exposed client-side
+      googleMapsApiKey: '', // can be overridden by NUXT_PUBLIC_GOOGLE_MAPS_API_KEY environment variable
     }
   },
   app: {
     head: {
-      script: []
+      script: []  // Google Maps is now loaded via plugin
     }
   },
   tailwindcss: {
