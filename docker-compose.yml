@@ -6,8 +6,8 @@ services:
     container_name: traefik
     restart: always
     environment:
-      - ACME_EMAIL=peterkazazes@academy.bt
-      - DOMAIN=maintenance.dungkar.bt
+      - ACME_EMAIL=${ACME_EMAIL}
+      - DOMAIN=${DOMAIN}
     ports:
       - "80:80"
       - "443:443"
@@ -28,12 +28,12 @@ services:
 
   app:
     build: .
-    container_name: dungkar_dzong_app
+    container_name: ${APP_NAME:-dungkar_dzong_app}
     restart: always
     depends_on:
       - postgres
     environment:
-      - DATABASE_URL=postgresql://dungkar:dungkar_secret@postgres:5432/dungkar_dzong_db
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       - GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD}
     volumes:
@@ -52,12 +52,12 @@ services:
 
   postgres:
     image: postgres:16-alpine
-    container_name: dungkar_dzong_db
+    container_name: ${DB_NAME:-dungkar_dzong_db}
     restart: always
     environment:
-      POSTGRES_USER: dungkar
-      POSTGRES_PASSWORD: dungkar_secret
-      POSTGRES_DB: dungkar_dzong_db
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     labels:

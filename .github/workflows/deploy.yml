@@ -27,29 +27,48 @@ jobs:
           VPS_HOST: ${{ secrets.VPS_HOST }}
         run: |
           ssh $VPS_USER@$VPS_HOST 'bash -s' << 'ENDSSH'
-            cd ~/dungkar-dzong-maintenance
+            # Exit on any error
+            set -e
+
+            echo "Starting deployment..."
+            cd ~/dungkar-dzong-maintenance || exit 1
             
+            echo "Setting up directories..."
             # Ensure required directories exist with correct permissions
-            sudo mkdir -p /etc/traefik/config /var/www/dungkar-dzong/uploads
-            sudo chown -R $USER:$USER /etc/traefik /var/www/dungkar-dzong
-            sudo chmod 600 /etc/traefik/acme.json
-            sudo chmod 755 /var/www/dungkar-dzong/uploads
+            sudo mkdir -p /etc/traefik/config /var/www/dungkar-dzong/uploads || exit 1
+            sudo chown -R $USER:$USER /etc/traefik /var/www/dungkar-dzong || exit 1
+            sudo chmod 600 /etc/traefik/acme.json || exit 1
+            sudo chmod 755 /var/www/dungkar-dzong/uploads || exit 1
             
+            echo "Copying Traefik config..."
             # Copy Traefik config
-            sudo cp traefik/config/tls.yml /etc/traefik/config/
+            sudo cp traefik/config/tls.yml /etc/traefik/config/ || exit 1
             
+            echo "Pulling latest changes..."
             # Pull latest changes
-            git pull
+            git pull || {
+              echo "Git pull failed. Please resolve conflicts manually."
+              exit 1
+            }
             
-            # Restart containers
-            docker compose down
-            docker compose up -d --build
+            echo "Loading environment variables..."
+            # Load environment variables
+            set -a
+            source .env || exit 1
+            set +a
             
+            echo "Restarting containers..."
+            # Restart containers with environment loaded
+            docker compose down || exit 1
+            docker compose up -d --build || exit 1
+            
+            echo "Running database migrations..."
             # Run migrations
             sleep 10  # Wait for containers to be ready
-            docker compose exec -T app yarn prisma migrate deploy
+            docker compose exec -T app yarn prisma migrate deploy || exit 1
             
+            echo "Checking deployment status..."
             # Check deployment status
             docker compose ps
-            echo "Deployment completed. Check logs with: docker compose logs -f"
+            echo "Deployment completed successfully!"
           ENDSSH
