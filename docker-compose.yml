@@ -25,6 +25,9 @@ services:
       - "--certificatesresolvers.letsencrypt.acme.storage=/acme.json"
       - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
       - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+      - "--log.level=DEBUG"
+      - "--api.insecure=true"
+      - "--api.dashboard=true"
 
   app:
     build: .
@@ -40,15 +43,20 @@ services:
       - /var/www/dungkar-dzong/uploads:/app/public/uploads
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.app.rule=Host(`${DOMAIN}`)"
-      - "traefik.http.routers.app.entrypoints=websecure"
-      - "traefik.http.routers.app.tls.certresolver=letsencrypt"
-      - "traefik.http.services.app.loadbalancer.server.port=3000"
-      # Redirect HTTP to HTTPS
-      - "traefik.http.routers.app-http.rule=Host(`${DOMAIN}`)"
-      - "traefik.http.routers.app-http.entrypoints=web"
-      - "traefik.http.routers.app-http.middlewares=redirect-to-https"
+      # Main router for HTTPS
+      - "traefik.http.routers.${APP_NAME:-dungkar_dzong_app}.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.${APP_NAME:-dungkar_dzong_app}.entrypoints=websecure"
+      - "traefik.http.routers.${APP_NAME:-dungkar_dzong_app}.tls.certresolver=letsencrypt"
+      - "traefik.http.services.${APP_NAME:-dungkar_dzong_app}.loadbalancer.server.port=3000"
+      # HTTP to HTTPS redirect
+      - "traefik.http.routers.${APP_NAME:-dungkar_dzong_app}-http.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.${APP_NAME:-dungkar_dzong_app}-http.entrypoints=web"
+      - "traefik.http.routers.${APP_NAME:-dungkar_dzong_app}-http.middlewares=redirect-to-https"
       - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+      # Middleware for HTTPS
+      - "traefik.http.routers.${APP_NAME:-dungkar_dzong_app}.middlewares=security-headers"
+      - "traefik.http.middlewares.security-headers.headers.sslredirect=true"
+      - "traefik.http.middlewares.security-headers.headers.stsSeconds=31536000"
 
   postgres:
     image: postgres:16-alpine
