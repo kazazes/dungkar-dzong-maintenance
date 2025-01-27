@@ -1,0 +1,30 @@
+version: "3.8"
+
+services:
+  # app:
+  #   build: .
+  #   container_name: ${APP_NAME:-dungkar_dzong_app}
+  #   restart: always
+  #   depends_on:
+  #     - postgres
+  #   environment:
+  #     - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+  #     - NUXT_PUBLIC_GOOGLE_MAPS_API_KEY=${NUXT_PUBLIC_GOOGLE_MAPS_API_KEY}
+  #     - NUXT_ADMIN_PASSWORD=${NUXT_ADMIN_PASSWORD}
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: ${DB_NAME:-dungkar_dzong_db}
+    ports:
+      - "5432:5432"
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
+    driver: local

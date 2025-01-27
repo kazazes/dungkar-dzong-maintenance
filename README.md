@@ -32,7 +32,7 @@ A web-based maintenance request management system for Dungkar Dzong, built with 
 
 ## Environment Setup
 
-Create a `.env` file in the root directory:
+Create a `.env` file in the root directory, for local development, you can use the `.env.example` file as a reference.
 
 ```env
 # Database
@@ -72,7 +72,8 @@ yarn install
 3. Start the development environment:
 
 ```bash
-docker compose up -d postgres
+docker compose -f docker-compose.dev.yml up -d postgres
+yarn prisma migrate dev
 yarn dev
 ```
 
