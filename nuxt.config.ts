@@ -21,5 +21,13 @@ export default defineNuxtConfig({
   },
   tailwindcss: {
     exposeConfig: true
+  },
+  nitro: {
+    publicAssets: [
+      {
+        baseURL: '/uploads',
+        dir: 'public/uploads'
+      }
+    ]
   }
 })
