@@ -57,12 +57,6 @@ services:
       - "traefik.http.routers.${APP_NAME:-dungkar_dzong_app}.middlewares=security-headers"
       - "traefik.http.middlewares.security-headers.headers.sslredirect=true"
       - "traefik.http.middlewares.security-headers.headers.stsSeconds=31536000"
-      # Static file serving for uploads
-      - "traefik.http.routers.${APP_NAME:-dungkar_dzong_app}-uploads.rule=Host(`${DOMAIN}`) && PathPrefix(`/uploads/`)"
-      - "traefik.http.routers.${APP_NAME:-dungkar_dzong_app}-uploads.entrypoints=websecure"
-      - "traefik.http.routers.${APP_NAME:-dungkar_dzong_app}-uploads.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.${APP_NAME:-dungkar_dzong_app}-uploads.service=${APP_NAME:-dungkar_dzong_app}-uploads"
-      - "traefik.http.services.${APP_NAME:-dungkar_dzong_app}-uploads.loadbalancer.server.port=3000"
 
   postgres:
     image: postgres:16-alpine
