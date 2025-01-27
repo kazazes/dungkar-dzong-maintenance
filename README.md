@@ -1,29 +1,34 @@
-# Dungkar Dzong Maintenance System
+# Dungkar Estate Maintenance System
 
 A web-based maintenance request management system for Dungkar Dzong, built with Nuxt 3, Prisma, and PostgreSQL.
 
 ## Features
 
-- 📝 Submit maintenance requests with location mapping
+- 📝 Submit maintenance requests with optional location mapping
 - 🗺️ Interactive map selection using Google Maps
 - 📸 Image upload support for both requests and resolutions
 - 🔍 Admin dashboard for request management
-- 📱 Responsive design for all devices
-- 🔐 Secure admin authentication
+- 🔐 Secure server-side admin authentication
+- 🚀 Docker deployment with Traefik reverse proxy
+- 🔒 Automatic HTTPS with Let's Encrypt
+- ✅ End-to-end testing with Playwright
 
 ## Tech Stack
 
 - **Frontend**: Nuxt 3, Vue 3, TailwindCSS
 - **Backend**: Nuxt Server (built-in), Prisma ORM
 - **Database**: PostgreSQL 16
-- **Container**: Docker
+- **Container**: Docker, Docker Compose
+- **Proxy**: Traefik 2.10
 - **Maps**: Google Maps JavaScript API
+- **Testing**: Playwright
 
 ## Prerequisites
 
 - Node.js 18+ and Yarn
 - Docker and Docker Compose
 - Google Maps API Key
+- Domain name (for production deployment)
 
 ## Environment Setup
 
@@ -31,98 +36,25 @@ Create a `.env` file in the root directory:
 
 ```env
 # Database
-DATABASE_URL="postgresql://dungkar:dungkar_secret@localhost:5432/dungkar_dzong_db"
+DATABASE_URL="postgresql://dungkar:dungkar_secret@postgres:5432/dungkar_dzong_db"
 
 # Google Maps
-GOOGLE_MAPS_API_KEY="your_google_maps_api_key"
+NUXT_PUBLIC_GOOGLE_MAPS_API_KEY="your_google_maps_api_key"
 
 # Admin Authentication
-ADMIN_PASSWORD="password"
+NUXT_ADMIN_PASSWORD="your_secure_password"
+
+# Deployment
+DOMAIN="your-domain.com"
+ACME_EMAIL="your-email@example.com"
+APP_NAME="dungkar_dzong_app"
+DB_NAME="dungkar_dzong_db"
+POSTGRES_USER="dungkar"
+POSTGRES_PASSWORD="dungkar_secret"
+POSTGRES_DB="dungkar_dzong_db"
 ```
 
-## Configuration Files
-
-### docker-compose.yml
-
-```yaml
-version: "3.8"
-services:
-  postgres:
-    image: postgres:16-alpine
-    container_name: dungkar_dzong_db
-    restart: always
-    ports:
-      - "5432:5432"
-    environment:
-      POSTGRES_USER: dungkar
-      POSTGRES_PASSWORD: dungkar_secret
-      POSTGRES_DB: dungkar_dzong_db
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-volumes:
-  postgres_data:
-```
-
-### nuxt.config.ts
-
-```typescript
-export default defineNuxtConfig({
-  compatibilityDate: "2024-11-01",
-  devtools: { enabled: true },
-  modules: ["@nuxtjs/tailwindcss", "@nuxt/ui"],
-  runtimeConfig: {
-    public: {
-      googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY,
-    },
-  },
-  app: {
-    head: {
-      script: [
-        {
-          src: `https://maps.googleapis.com/maps/api/js?key=${process.env.GOOGLE_MAPS_API_KEY}`,
-          defer: true,
-        },
-      ],
-    },
-  },
-});
-```
-
-### prisma/schema.prisma
-
-```prisma
-generator client {
-  provider = "prisma-client-js"
-}
-
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
-
-model MaintenanceRequest {
-  id               Int       @id @default(autoincrement())
-  location         String
-  latitude         Float
-  longitude        Float
-  contactName      String
-  contactNumber    String
-  category         String    // ELECTRICAL, PLUMBING, INTERNET_CABLE, OTHER
-  priority         String    // LOW, MEDIUM, HIGH, URGENT
-  details          String    @db.Text
-  imagePath        String?
-  status          String    @default("PENDING")
-  resolvedBy      String?
-  resolvedAt      DateTime?
-  resolutionNotes String?   @db.Text
-  resolutionImages String[]
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-}
-```
-
-## Installation
+## Development Setup
 
 1. Clone the repository:
 
@@ -137,62 +69,109 @@ cd dungkar-dzong-maintenance
 yarn install
 ```
 
-3. Start the database:
+3. Start the development environment:
 
 ```bash
-docker-compose up -d
-```
-
-4. Run database migrations:
-
-```bash
-yarn prisma migrate dev
-```
-
-5. Start the development server:
-
-```bash
+docker compose up -d postgres
 yarn dev
 ```
 
-The application will be available at `http://localhost:3000`
+## Testing
+
+Run end-to-end tests with Playwright:
+
+```bash
+# Run tests
+yarn test
+
+# Run tests with UI
+yarn test:ui
+
+# Debug tests
+yarn test:debug
+```
+
+## Production Deployment
+
+1. Set up your server with Docker and Docker Compose.
+
+2. Configure your DNS to point to your server.
+
+3. Create required directories and set permissions:
+
+```bash
+sudo mkdir -p /etc/traefik/config /var/www/dungkar-dzong/uploads
+sudo chown -R $USER:$USER /etc/traefik /var/www/dungkar-dzong
+sudo chmod 600 /etc/traefik/acme.json
+sudo chmod 755 /var/www/dungkar-dzong/uploads
+```
+
+4. Deploy using Docker Compose:
+
+```bash
+docker compose up -d
+```
+
+5. Run database migrations:
+
+```bash
+docker compose exec app yarn prisma migrate deploy
+```
 
 ## Project Structure
 
 ```
 ├── components/          # Vue components
+│   └── LocationMap.vue # Google Maps integration
 ├── pages/              # Application pages
-├── prisma/
-│   └── schema.prisma   # Database schema
-├── public/             # Static files
-├── server/             # API routes
-├── docker-compose.yml  # Docker configuration
-├── nuxt.config.ts      # Nuxt configuration
-├── package.json        # Project dependencies
-└── tsconfig.json       # TypeScript configuration
+│   ├── index.vue      # Maintenance request form
+│   └── admin/         # Admin interface
+├── server/            # API routes
+│   └── api/          # Server endpoints
+├── prisma/           # Database schema and migrations
+├── tests/            # E2E tests
+├── traefik/          # Traefik configuration
+├── docker-compose.yml # Docker services configuration
+├── Dockerfile        # Application container build
+├── nuxt.config.ts    # Nuxt configuration
+└── playwright.config.ts # Playwright test configuration
 ```
+
+## Security Features
+
+- Server-side password validation for admin login
+- Secure cookie-based authentication
+- Protected admin routes with middleware
+- TLS 1.2+ with strong cipher suites
+- Automatic HTTPS redirection
+- Secure headers with Traefik
+- Environment-based configuration
 
 ## Available Scripts
 
 - `yarn dev`: Start development server
 - `yarn build`: Build for production
 - `yarn preview`: Preview production build
+- `yarn test`: Run Playwright tests
 - `yarn prisma generate`: Generate Prisma client
 - `yarn prisma migrate dev`: Run database migrations
 - `yarn prisma studio`: Open Prisma database UI
 
-## Deployment
+## Continuous Deployment
 
-1. Build the application:
+The project uses GitHub Actions for automated deployment:
 
-```bash
-yarn build
-```
+1. Pushes to the `main` branch trigger automatic deployment
+2. The workflow:
+   - Connects to the VPS via SSH
+   - Updates the application code
+   - Rebuilds containers
+   - Runs database migrations
+   - Verifies the deployment
 
-2. Set up your production environment variables.
+## Contributing
 
-3. Start the application:
-
-```bash
-yarn preview
-```
+1. Create a feature branch
+2. Make your changes
+3. Run tests
+4. Submit a pull request
