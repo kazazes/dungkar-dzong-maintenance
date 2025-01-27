@@ -23,11 +23,16 @@ export default defineNuxtConfig({
     exposeConfig: true
   },
   nitro: {
-    publicAssets: [
-      {
-        baseURL: '/uploads',
-        dir: 'public/uploads'
+    storage: {
+      uploads: {
+        driver: 'fs',
+        base: './public/uploads'
       }
-    ]
+    },
+    routeRules: {
+      '/uploads/**': {
+        proxy: '/uploads/**'
+      }
+    }
   }
 })
