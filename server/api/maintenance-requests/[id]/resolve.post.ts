@@ -22,6 +22,7 @@ export default defineEventHandler(async (event: H3Event) => {
         for (const field of formData) {
             const fieldName = field.name || ''
             if (fieldName.startsWith('resolutionImage')) {
+                console.log(`Processing image: ${field.filename}`)
                 resolutionImages.push({
                     filename: field.filename || `${Date.now()}.jpg`,
                     data: field.data
@@ -39,20 +40,30 @@ export default defineEventHandler(async (event: H3Event) => {
         // Handle resolution images
         const resolutionImagePaths: string[] = []
         if (resolutionImages.length > 0) {
-            // Create uploads directory if it doesn't exist
-            const uploadsDir = join(process.cwd(), 'public', 'uploads', 'resolutions')
-            await mkdir(uploadsDir, { recursive: true })
+            try {
+                // Create uploads directory if it doesn't exist
+                const uploadsDir = join(process.cwd(), 'public', 'uploads', 'resolutions')
+                console.log(`Creating directory: ${uploadsDir}`)
+                await mkdir(uploadsDir, { recursive: true })
 
-            // Save each image
-            for (const image of resolutionImages) {
-                const filename = `${Date.now()}-${image.filename}`
-                const filePath = join(uploadsDir, filename)
-                await writeFile(filePath, image.data)
-                resolutionImagePaths.push(`/uploads/resolutions/${filename}`)
+                // Save each image
+                for (const image of resolutionImages) {
+                    const filename = `${Date.now()}-${image.filename}`
+                    const filePath = join(uploadsDir, filename)
+                    console.log(`Saving image to: ${filePath}`)
+                    await writeFile(filePath, image.data)
+                    const imagePath = `/uploads/resolutions/${filename}`
+                    console.log(`Image path for database: ${imagePath}`)
+                    resolutionImagePaths.push(imagePath)
+                }
+            } catch (err) {
+                console.error('Error handling resolution images:', err)
+                throw err
             }
         }
 
         // Update maintenance request
+        console.log('Updating request with resolution images:', resolutionImagePaths)
         const request = await prisma.maintenanceRequest.update({
             where: { id },
             data: {
