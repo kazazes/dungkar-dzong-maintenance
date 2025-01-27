@@ -15,9 +15,10 @@
                 </div>
 
                 <div>
-                    <button type="submit"
-                        class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                        Sign in
+                    <button type="submit" :disabled="isLoading"
+                        class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50">
+                        <span v-if="isLoading">Signing in...</span>
+                        <span v-else>Sign in</span>
                     </button>
                 </div>
 
@@ -27,25 +28,41 @@
     </div>
 </template>
 
-<script setup>
-const config = useRuntimeConfig()
+<script setup lang="ts">
+import { useCookie } from '#app'
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+
 const password = ref('')
 const error = ref('')
+const isLoading = ref(false)
 const router = useRouter()
 const adminAuth = useCookie('admin_authenticated')
 
-const handleLogin = () => {
-    if (password.value === config.public.adminPassword) {
-        adminAuth.value = 'true'
-        router.push('/admin')
-        error.value = ''
-    } else {
-        error.value = 'Invalid password'
+const handleLogin = async () => {
+    error.value = ''
+    isLoading.value = true
+
+    try {
+        const response = await $fetch('/api/auth/login', {
+            method: 'POST',
+            body: { password: password.value }
+        })
+
+        if (response.success) {
+            adminAuth.value = 'true'
+            await router.push('/admin')
+        }
+    } catch (e: any) {
+        error.value = e.data?.message || 'Invalid password'
+        password.value = '' // Clear password on error
+    } finally {
+        isLoading.value = false
     }
 }
 
-// Redirect if already authenticated
-if (adminAuth.value) {
+// Only check authentication on client side
+if (process.client && adminAuth.value) {
     router.push('/admin')
 }
 </script>
