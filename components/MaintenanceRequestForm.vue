@@ -30,6 +30,7 @@
                         <option value="ELECTRICAL">Electrical</option>
                         <option value="PLUMBING">Plumbing</option>
                         <option value="INTERNET & CABLE">IT</option>
+                        <option value="HVAC">HVAC</option>
                         <option value="OTHER">Other</option>
                     </select>
                 </div>
