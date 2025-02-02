@@ -1,6 +1,6 @@
 <template>
     <div class="max-w-4xl mx-auto p-8">
-        <h2 class="text-2xl font-bold mb-6 text-gray-800">Dungkar Dzong Maintenance Request</h2>
+        <h2 class="text-2xl font-bold mb-6 text-gray-800">Dungkar Estate Maintenance Request</h2>
         <form @submit.prevent="submitForm" class="space-y-6">
             <!-- Contact Details Section -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -88,7 +88,7 @@
                     <label for="location" class="block text-sm font-medium text-gray-700 mb-1">Location
                         Description</label>
                     <input id="location" v-model="formData.location" type="text" required
-                        placeholder="Enter location in Dungkar Dzong"
+                        placeholder="Enter location in Dungkar Estate"
                         class="block w-full px-4 py-3 rounded-lg border border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
                 </div>
 
