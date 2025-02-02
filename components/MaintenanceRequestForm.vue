@@ -29,7 +29,7 @@
                         <option value="">Select category</option>
                         <option value="ELECTRICAL">Electrical</option>
                         <option value="PLUMBING">Plumbing</option>
-                        <option value="IT">Internet & Cable</option>
+                        <option value="INTERNET & CABLE">IT</option>
                         <option value="OTHER">Other</option>
                     </select>
                 </div>
