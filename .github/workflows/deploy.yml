@@ -31,14 +31,14 @@ jobs:
             set -e
 
             echo "Starting deployment..."
-            cd ~/dungkar-dzong-maintenance || exit 1
+            cd ~/dungkar-estate-maintenance || exit 1
             
             echo "Setting up directories..."
             # Ensure required directories exist with correct permissions
-            sudo mkdir -p /etc/traefik/config /var/www/dungkar-dzong/uploads || exit 1
+            sudo mkdir -p /etc/traefik/config /var/www/dungkar-estate/uploads || exit 1
             sudo chown -R $USER:$USER /etc/traefik /var/www/dungkar-dzong || exit 1
             sudo chmod 600 /etc/traefik/acme.json || exit 1
-            sudo chmod 755 /var/www/dungkar-dzong/uploads || exit 1
+            sudo chmod 755 /var/www/dungkar-estate/uploads || exit 1
             
             echo "Copying Traefik config..."
             # Copy Traefik config
