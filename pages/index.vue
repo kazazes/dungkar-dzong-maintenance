@@ -3,7 +3,7 @@
         <div class="text-center">
             <h2 class="text-2xl font-semibold text-gray-900">Submit a Maintenance Request</h2>
             <p class="mt-2 text-gray-600">
-                Use this form to report any maintenance needs within Dungkar Dzong.
+                Use this form to report any maintenance needs within Dungkar Estate.
                 We'll address your request based on the priority level.
             </p>
         </div>
