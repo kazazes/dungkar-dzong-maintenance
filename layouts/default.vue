@@ -9,7 +9,7 @@
                 <div class="flex justify-between items-center py-6">
                     <div class="flex items-center">
                         <h1 class="text-3xl font-bold text-indigo-900">
-                            Dungkar Dzong
+                            Dungkar Estate
                         </h1>
                         <span class="ml-2 px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800">
                             Maintenance System
