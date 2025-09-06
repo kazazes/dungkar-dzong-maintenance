@@ -29,7 +29,9 @@
                         <option value="">Select category</option>
                         <option value="ELECTRICAL">Electrical</option>
                         <option value="PLUMBING">Plumbing</option>
-                        <option value="INTERNET & CABLE">IT</option>
+                        <option value="IT">IT</option>
+                        <option value="Carpenter">Carpentry</option>
+                        <option value="Civil">Mason</option>
                         <option value="HVAC">HVAC</option>
                         <option value="OTHER">Other</option>
                     </select>
